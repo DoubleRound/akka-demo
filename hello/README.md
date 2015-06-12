@@ -1,0 +1,5 @@
+# akka-hello
+
+这个是akka的HelloWorld，akka官网文档的例子一开始不是很好理解
+
+官方计算圆周率的demo初学者可能不好理解，先看HelloActor，再看HengHa,最后再看Pi这个可能就好理解了
