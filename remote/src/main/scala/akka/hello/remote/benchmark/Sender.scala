@@ -23,6 +23,7 @@ object Sender {
     val remoteHostPort = if (args.length >= 1) args(0) else "127.0.0.1:2553"
 
     val remotePath = s"akka.tcp://Sys@$remoteHostPort/user/rcv"
+
     val totalMessages = if (args.length >= 2) args(1).toInt else 500000
     val burstSize = if (args.length >= 3) args(2).toInt else 5000
     val payloadSize = if (args.length >= 4) args(3).toInt else 100
@@ -45,14 +46,12 @@ class Sender(path: String, totalMessages: Int, burstSize: Int, payloadSize: Int)
   var maxRoundTripMillis = 0L
 
   context.setReceiveTimeout(3.seconds)
+
+  val remoteActor = context.actorSelection("akka.tcp://Sys@127.0.0.1:2553/user/rcv")
+
   sendIdentifyRequest()
 
-  def sendIdentifyRequest(): Unit =
-    context.actorSelection(path) ! Identify(path)
-
-  def receive = identifying
-
-  def identifying: Receive = {
+  def receive = {
     case ActorIdentity(`path`, Some(actor)) =>
       context.watch(actor)
       context.become(active(actor))
@@ -61,6 +60,8 @@ class Sender(path: String, totalMessages: Int, burstSize: Int, payloadSize: Int)
     case ActorIdentity(`path`, None) => println(s"Remote actor not available: $path")
     case ReceiveTimeout => sendIdentifyRequest()
   }
+
+  def sendIdentifyRequest(): Unit = remoteActor ! Identify(path)
 
   def active(actor: ActorRef): Receive = {
     case Warmup =>
