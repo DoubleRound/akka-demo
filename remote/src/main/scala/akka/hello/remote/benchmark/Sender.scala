@@ -45,9 +45,9 @@ class Sender(path: String, totalMessages: Int, burstSize: Int, payloadSize: Int)
   var startTime = 0L
   var maxRoundTripMillis = 0L
 
-  context.setReceiveTimeout(3.seconds)
+  val remoteActor = context.actorSelection(path)
 
-  val remoteActor = context.actorSelection("akka.tcp://Sys@127.0.0.1:2553/user/rcv")
+  context.setReceiveTimeout(3.seconds)
 
   sendIdentifyRequest()
 
